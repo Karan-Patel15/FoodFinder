@@ -1,0 +1,26 @@
+<% layout("layouts/boilerplate") %>
+
+
+<div class="row">
+    <div class="col-6 offset-3">
+
+        <div class="card mb-3">
+            <img src="<%= restaurant.image %>" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title"><%=restaurant.name%></h5>
+              <p class="card-text"><%= restaurant.description %></p>
+              <p class="card-text"><small class="text-body-secondary"><%= restaurant.address %></small></p>
+            </div>
+            
+            <div class="card-body">
+                <a class="btn btn-primary" href="/restaurants/<%=restaurant._id%>/edit">Edit</a>
+                <form class="d-inline" action="/restaurants/<%= restaurant._id%>?_method=DELETE" method="POST">
+                    
+                    <button class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+          </div>
+
+    </div>
+</div>
+    
