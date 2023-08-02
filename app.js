@@ -6,7 +6,9 @@ const method_override = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
 const wrapAsync = require('./util/wrapAsync');
-const ExpressError = require("./util/ExpressError.js")
+const ExpressError = require("./util/ExpressError.js");
+const Joi = require('joi');
+const {restaurantSchema} = require('./schemas.js')
 const mongoose = require('mongoose');
 const Restaurant = require("./models/restaurant");
 
@@ -17,9 +19,6 @@ app.use(express.urlencoded({extended: true}));
 app.use(method_override("_method"));
 app.use(morgan('dev'));
 app.use(express.static('./public'))
-app.use((req, res, next) => {
-    next();
-})
 
 app.engine('ejs', ejsMate);
 
@@ -38,7 +37,15 @@ app.listen(PORT, () => {
 });
 
 
-
+const validateRestaurant = (req, res, next) => {
+    const {error} = restaurantSchema.validate(req.body);
+    if (error) {
+        const message = error.details.map(element => element.message).join(",");
+        throw new ExpressError(message, 400);
+    } else {
+        next();
+    }
+}
 
 app.get("/", (req, res) => {
     res.render("home");
@@ -56,7 +63,7 @@ app.get("/restaurants/new", (req, res) => {
 })
 
 //creation
-app.post("/restaurants", wrapAsync(async(req, res) => {
+app.post("/restaurants", validateRestaurant, wrapAsync(async(req, res) => {
     const restaurant = new Restaurant(req.body.restaurant);
     await restaurant.save();
     res.redirect(`/restaurants/${restaurant._id}`);
@@ -77,7 +84,7 @@ app.get("/restaurants/:id/edit", wrapAsync(async(req, res) => {
 }));
 
 //update entry
-app.put("/restaurants/:id", wrapAsync(async(req, res) => {
+app.put("/restaurants/:id", validateRestaurant, wrapAsync(async(req, res) => {
     const {id} = req.params;
     await Restaurant.findByIdAndUpdate(id, req.body.restaurant, { runValidators: true});
     res.redirect(`/restaurants/${id}`);
