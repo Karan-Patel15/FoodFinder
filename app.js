@@ -105,7 +105,6 @@ app.post("/restaurants/:id/reviews", wrapAsync(async (req, res) => {
     restaurant.reviews.push(review);
     await review.save();
     await restaurant.save();
-    console.log(restaurant.reviews);
     res.redirect(`/restaurants/${id}`)
 }))
 
