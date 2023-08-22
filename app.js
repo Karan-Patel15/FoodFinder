@@ -8,14 +8,15 @@ const ejsMate = require('ejs-mate');
 const wrapAsync = require('./util/wrapAsync');
 const ExpressError = require("./util/ExpressError.js");
 const Joi = require('joi');
-const {restaurantSchema} = require('./schemas.js')
+const { restaurantSchema } = require('./schemas.js')
 const mongoose = require('mongoose');
 const Restaurant = require("./models/restaurant");
+const Review = require('./models/review');
 
 app.set('views', path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(method_override("_method"));
 app.use(morgan('dev'));
 app.use(express.static('./public'))
@@ -23,13 +24,13 @@ app.use(express.static('./public'))
 app.engine('ejs', ejsMate);
 
 mongoose.connect('mongodb://127.0.0.1:27017/food-finder')
-.then(() => {
-    console.log("Mongo Connection Open");
-})
-.catch(err => {
-    console.log("Mongo Connection Error");
-    console.log(err);
-})
+    .then(() => {
+        console.log("Mongo Connection Open");
+    })
+    .catch(err => {
+        console.log("Mongo Connection Error");
+        console.log(err);
+    })
 
 
 app.listen(PORT, () => {
@@ -38,7 +39,7 @@ app.listen(PORT, () => {
 
 
 const validateRestaurant = (req, res, next) => {
-    const {error} = restaurantSchema.validate(req.body);
+    const { error } = restaurantSchema.validate(req.body);
     if (error) {
         const message = error.details.map(element => element.message).join(",");
         throw new ExpressError(message, 400);
@@ -52,9 +53,9 @@ app.get("/", (req, res) => {
 });
 
 //index page show all restaurants
-app.get("/restaurants", wrapAsync(async(req, res) => {
+app.get("/restaurants", wrapAsync(async (req, res) => {
     const restaurants = await Restaurant.find({});
-    res.render("restaurants/index", {restaurants});
+    res.render("restaurants/index", { restaurants });
 }));
 
 //render new entry form
@@ -62,39 +63,51 @@ app.get("/restaurants/new", (req, res) => {
     res.render("restaurants/new");
 })
 
-//creation
-app.post("/restaurants", validateRestaurant, wrapAsync(async(req, res) => {
+//create restaurant
+app.post("/restaurants", validateRestaurant, wrapAsync(async (req, res) => {
     const restaurant = new Restaurant(req.body.restaurant);
     await restaurant.save();
     res.redirect(`/restaurants/${restaurant._id}`);
 }));
 
 //show entry
-app.get("/restaurants/:id", wrapAsync(async(req, res) => {
+app.get("/restaurants/:id", wrapAsync(async (req, res) => {
     const id = req.params.id;
     const restaurant = await Restaurant.findById(id);
-    res.render("restaurants/show", {restaurant});
+    res.render("restaurants/show", { restaurant });
 }));
 
 //render edit form
-app.get("/restaurants/:id/edit", wrapAsync(async(req, res) => {
-    const {id} = req.params
+app.get("/restaurants/:id/edit", wrapAsync(async (req, res) => {
+    const { id } = req.params
     const restaurant = await Restaurant.findById(id);
-    res.render("restaurants/edit", {restaurant});
+    res.render("restaurants/edit", { restaurant });
 }));
 
 //update entry
-app.put("/restaurants/:id", validateRestaurant, wrapAsync(async(req, res) => {
-    const {id} = req.params;
-    await Restaurant.findByIdAndUpdate(id, req.body.restaurant, { runValidators: true});
+app.put("/restaurants/:id", validateRestaurant, wrapAsync(async (req, res) => {
+    const { id } = req.params;
+    await Restaurant.findByIdAndUpdate(id, req.body.restaurant, { runValidators: true });
     res.redirect(`/restaurants/${id}`);
 }));
 
-app.delete("/restaurants/:id", wrapAsync(async(req, res) => {
-    const {id} = req.params;
+app.delete("/restaurants/:id", wrapAsync(async (req, res) => {
+    const { id } = req.params;
     await Restaurant.findByIdAndDelete(id);
     res.redirect("/restaurants");
 }));
+
+//create review
+app.post("/restaurants/:id/reviews", wrapAsync(async (req, res) => {
+    const { id } = req.params;
+    const restaurant = await Restaurant.findById(id);
+    const review = new Review(req.body.review)
+    restaurant.reviews.push(review);
+    await review.save();
+    await restaurant.save();
+    console.log(restaurant.reviews);
+    res.redirect(`/restaurants/${id}`)
+}))
 
 app.all("*", (req, res) => {
     throw new ExpressError("Page Not Found", 404);
@@ -105,5 +118,5 @@ app.use((err, req, res, next) => {
     if (!err.message) {
         err.message = "Something Went Wrong";
     }
-    res.status(err.statusCode).render("error.ejs", {err});
+    res.status(err.statusCode).render("error.ejs", { err });
 });
