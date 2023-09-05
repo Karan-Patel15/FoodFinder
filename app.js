@@ -12,6 +12,7 @@ const { restaurantSchema, reviewSchema } = require('./schemas.js');
 const mongoose = require('mongoose');
 const Restaurant = require("./models/restaurant");
 const Review = require('./models/review');
+const review = require("./models/review");
 
 app.set('views', path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -102,14 +103,14 @@ app.put("/restaurants/:id", validateRestaurant, wrapAsync(async (req, res) => {
     res.redirect(`/restaurants/${id}`);
 }));
 
-//delete restaurant
+//DELETE restaurant
 app.delete("/restaurants/:id", wrapAsync(async (req, res) => {
     const { id } = req.params;
     await Restaurant.findByIdAndDelete(id);
     res.redirect("/restaurants");
 }));
 
-//create review
+//CREATE review
 app.post("/restaurants/:id/reviews", validateReview, wrapAsync(async (req, res) => {
     const { id } = req.params;
     const restaurant = await Restaurant.findById(id);
@@ -118,6 +119,15 @@ app.post("/restaurants/:id/reviews", validateReview, wrapAsync(async (req, res) 
     await review.save();
     await restaurant.save();
     res.redirect(`/restaurants/${id}`)
+}))
+
+// DELETE review
+app.delete('/restaurants/:id/reviews/:reviewId', wrapAsync(async (req, res) => {
+    const { id, reviewId } = req.params;
+    await Restaurant.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/restaurants/${id}`);
+
 }))
 
 app.all("*", (req, res) => {

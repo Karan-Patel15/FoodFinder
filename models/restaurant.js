@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Review = require('./review.js');
 const schema = mongoose.Schema;
 const restaurantSchema = new schema({
     name: {
@@ -19,4 +20,16 @@ const restaurantSchema = new schema({
         }
     ]
 });
+restaurantSchema.post('findOneAndDelete', async function (document) {
+    console.log('----------------------------');
+    if (document) { // if there is a deleted document
+        //remove all Review documents whose ids are contained in the reviews array in the restaurant document
+        await Review.deleteMany({
+            _id: {
+                $in: document.reviews
+            }
+        })
+
+    }
+})
 module.exports = mongoose.model("Restaurant", restaurantSchema);
