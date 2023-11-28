@@ -33,6 +33,7 @@ router.get("/new", (req, res) => {
 router.post("/", validateRestaurant, wrapAsync(async (req, res) => {
     const restaurant = new Restaurant(req.body.restaurant);
     await restaurant.save();
+    req.flash('success', 'Successfully made a new restaurant!');
     res.redirect(`/restaurants/${restaurant._id}`);
 }));
 
@@ -40,6 +41,10 @@ router.post("/", validateRestaurant, wrapAsync(async (req, res) => {
 router.get("/:id", wrapAsync(async (req, res) => {
     const id = req.params.id;
     const restaurant = await Restaurant.findById(id).populate("reviews");
+    if (!restaurant) {
+        req.flash('error', 'Cannot find that restaurant!');
+        res.redirect("/restaurants");
+    }
     res.render("restaurants/show", { restaurant });
 }));
 
@@ -47,6 +52,10 @@ router.get("/:id", wrapAsync(async (req, res) => {
 router.get("/:id/edit", wrapAsync(async (req, res) => {
     const { id } = req.params
     const restaurant = await Restaurant.findById(id);
+    if (!restaurant) {
+        req.flash('error', 'Cannot find that restaurant!');
+        res.redirect("/restaurants");
+    }
     res.render("restaurants/edit", { restaurant });
 }));
 
@@ -54,6 +63,7 @@ router.get("/:id/edit", wrapAsync(async (req, res) => {
 router.put("/:id", validateRestaurant, wrapAsync(async (req, res) => {
     const { id } = req.params;
     await Restaurant.findByIdAndUpdate(id, req.body.restaurant, { runValidators: true });
+    req.flash('success', 'Successfully updated restaurant!');
     res.redirect(`/restaurants/${id}`);
 }));
 
@@ -61,6 +71,7 @@ router.put("/:id", validateRestaurant, wrapAsync(async (req, res) => {
 router.delete("/:id", wrapAsync(async (req, res) => {
     const { id } = req.params;
     await Restaurant.findByIdAndDelete(id);
+    req.flash('success', 'Successfully deleted restaurant!');
     res.redirect("/restaurants");
 }));
 
