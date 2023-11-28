@@ -1,9 +1,9 @@
 <% layout("layouts/boilerplate") %>
-<h1 class="text-center">New Restaurant</h1>
-<div class="row"></div>
+    <h1 class="text-center">New Restaurant</h1>
+    <div class="row"></div>
     <div class="col-6 offset-3">
-        <form action="/restaurants" method="POST" class ="needs-validation" novalidate>
-            
+        <form action="/restaurants" method="POST" class="needs-validation" novalidate>
+
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
                 <input type="text" name="restaurant[name]" id="name" class="form-control" required>
@@ -12,11 +12,12 @@
                 </div>
                 <div class="invalid-feedback">
                     Please provide a valid name.
-                  </div>
+                </div>
             </div>
             <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea type="text" name="restaurant[description]" id="description" class="form-control" required></textarea>
+                <textarea type="text" name="restaurant[description]" id="description" class="form-control"
+                    required></textarea>
                 <div class="valid-feedback">
                     Looks good!
                 </div>
@@ -32,7 +33,7 @@
                 </div>
                 <div class="invalid-feedback">
                     Please provide a valid address.
-                  </div>
+                </div>
             </div>
             <div class="mb-3">
                 <label for="image_url" class="form-label">Image URL</label>
@@ -49,5 +50,4 @@
             <a class="btn btn-primary" href="/restaurants">Cancel</a>
         </form>
     </div>
-</div>
-<script src="/js/validateForm.js"></script>    
+    </div>

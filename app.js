@@ -5,14 +5,10 @@ const path = require('path');
 const method_override = require('method-override');
 const morgan = require('morgan');
 const ejsMate = require('ejs-mate');
-const wrapAsync = require('./util/wrapAsync');
 const ExpressError = require("./util/ExpressError.js");
-const Joi = require('joi');
-const { restaurantSchema, reviewSchema } = require('./schemas.js');
 const mongoose = require('mongoose');
-const Restaurant = require("./models/restaurant");
-const Review = require('./models/review');
-
+const session = require('express-session');
+const flash = require('connect-flash');
 const restaurantRouter = require('./routes/restaurantRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 
@@ -25,6 +21,27 @@ app.use(method_override("_method"));
 app.use(morgan('dev'));
 app.use(express.static('./public'));
 app.engine('ejs', ejsMate);
+
+const sessionConfig = {
+    secret: 'createBetterSecret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true
+    }
+};
+app.use(session(sessionConfig));
+app.use(flash());
+app.use((req, res, next) => {
+    res.locals.success = req.flash('success'); // returns empty array and sets up the flash architecture
+    res.locals.error = req.flash('error')
+    next();
+})
+
+app.use('/restaurants', restaurantRouter);
+app.use('/restaurants/:id/reviews', reviewRouter);
 
 mongoose.connect('mongodb://127.0.0.1:27017/food-finder')
     .then(() => {
@@ -39,23 +56,11 @@ mongoose.connect('mongodb://127.0.0.1:27017/food-finder')
 app.listen(PORT, () => {
     console.log(`Listening On Port ${PORT}`)
 });
-app.use('/restaurants', restaurantRouter);
-app.use('/restaurants/:id/reviews', reviewRouter);
 
 // home route
 app.get("/", (req, res) => {
     res.render("home");
 });
-
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if (error) {
-        const message = error.details.map(element => element.message).join(",");
-        throw new ExpressError(message, 400);
-    } else {
-        next();
-    }
-}
 
 app.all("*", (req, res) => {
     throw new ExpressError("Page Not Found", 404);
@@ -66,6 +71,6 @@ app.use((err, req, res, next) => {
     if (!err.message) {
         err.message = "Something Went Wrong";
     }
-    const {statusCode = 500} = err;
+    const { statusCode = 500 } = err;
     res.status(statusCode).render("error.ejs", { err });
 });

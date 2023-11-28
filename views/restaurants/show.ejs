@@ -39,6 +39,12 @@
                 <div class="mb-3">
                     <label class="form-label" for="body" class="for">Review</label>
                     <textarea class="form-control" name="review[body]" id="body" cols="30" rows="3" required></textarea>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please provide a valid description.
+                    </div>
                 </div>
                 <button class="btn btn-success">Submit</button>
             </form>
@@ -59,4 +65,3 @@
                 <% } %>
         </div>
     </div>
-    <script src="/js/validateForm.js"></script>
