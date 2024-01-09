@@ -6,6 +6,7 @@ const ExpressError = require("../util/ExpressError.js");
 const Restaurant = require("../models/restaurant");
 const Joi = require('joi');
 const { restaurantSchema } = require('../schemas.js');
+const { isLoggedIn } = require('../middleware.js');
 
 
 const validateRestaurant = (req, res, next) => {
@@ -25,7 +26,7 @@ router.get("/", wrapAsync(async (req, res) => {
 }));
 
 //render new entry form
-router.get("/new", (req, res) => {
+router.get("/new", isLoggedIn, (req, res) => {
     res.render("restaurants/new");
 })
 
@@ -38,7 +39,7 @@ router.post("/", validateRestaurant, wrapAsync(async (req, res) => {
 }));
 
 //show entry
-router.get("/:id", wrapAsync(async (req, res) => {
+router.get("/:id", isLoggedIn, wrapAsync(async (req, res) => {
     const id = req.params.id;
     const restaurant = await Restaurant.findById(id).populate("reviews");
     if (!restaurant) {
@@ -49,7 +50,7 @@ router.get("/:id", wrapAsync(async (req, res) => {
 }));
 
 //render edit form
-router.get("/:id/edit", wrapAsync(async (req, res) => {
+router.get("/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
     const { id } = req.params
     const restaurant = await Restaurant.findById(id);
     if (!restaurant) {
@@ -60,7 +61,7 @@ router.get("/:id/edit", wrapAsync(async (req, res) => {
 }));
 
 //update restaurant
-router.put("/:id", validateRestaurant, wrapAsync(async (req, res) => {
+router.put("/:id", isLoggedIn, validateRestaurant, wrapAsync(async (req, res) => {
     const { id } = req.params;
     await Restaurant.findByIdAndUpdate(id, req.body.restaurant, { runValidators: true });
     req.flash('success', 'Successfully updated restaurant!');
@@ -68,7 +69,7 @@ router.put("/:id", validateRestaurant, wrapAsync(async (req, res) => {
 }));
 
 //DELETE restaurant
-router.delete("/:id", wrapAsync(async (req, res) => {
+router.delete("/:id", isLoggedIn, wrapAsync(async (req, res) => {
     const { id } = req.params;
     await Restaurant.findByIdAndDelete(id);
     req.flash('success', 'Successfully deleted restaurant!');

@@ -11,6 +11,11 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const restaurantRouter = require('./routes/restaurantRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const authRouter = require('./routes/authRoutes');
+const cookieParser = require('cookie-parser');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const User = require('./models/user');
 
 app.set('views', path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -34,12 +39,24 @@ const sessionConfig = {
 };
 app.use(session(sessionConfig));
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser()); // how to store user in session
+passport.deserializeUser(User.deserializeUser()); // how to unstore user in session
+
 app.use((req, res, next) => {
     res.locals.success = req.flash('success'); // returns empty array and sets up the flash architecture
     res.locals.error = req.flash('error')
     next();
 })
 
+app.use((req, res, next) => {
+    res.locals.isSignedIn = req.isAuthenticated();
+    next();
+})
+
+app.use('/', authRouter);
 app.use('/restaurants', restaurantRouter);
 app.use('/restaurants/:id/reviews', reviewRouter);
 
@@ -59,6 +76,7 @@ app.listen(PORT, () => {
 
 // home route
 app.get("/", (req, res) => {
+    res.send(req.signedCookies);
     res.render("home");
 });
 

@@ -10,16 +10,24 @@
             <a class="nav-link active" aria-current="page" href="/">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/restaurants">Restaurants</a>
+            <a class="nav-link" aria-current="page" href="/restaurants">Restaurants</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/restaurants/new">New Restaurant</a>
+            <a class="nav-link" aria-current="page" href="/restaurants/new">New Restaurant</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="/register">Register</a>
           </li>
         </ul>
-        <form class="d-flex" role="search">
+        <!-- <form class="d-flex" role="search">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
+        </form> -->
+        <% if (!isSignedIn) { %>
+          <a class="d-flex btn btn-outline-info" href="/login" id="signIn">Sign In</a>
+        <% } else { %>
+          <a class="d-flex btn btn-outline-info" href="/logout" id="signOut">Sign Out</a>
+        <% } %>
       </div>
     </div>
   </nav>
