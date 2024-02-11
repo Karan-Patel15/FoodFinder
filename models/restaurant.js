@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const Review = require('./review.js');
 const schema = mongoose.Schema;
 const restaurantSchema = new schema({
+    author: {
+        type: schema.Types.ObjectId,
+        ref: 'User'
+    },
     name: {
         type: String,
         unique: true,

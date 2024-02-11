@@ -47,12 +47,8 @@ passport.deserializeUser(User.deserializeUser()); // how to unstore user in sess
 
 app.use((req, res, next) => {
     res.locals.success = req.flash('success'); // returns empty array and sets up the flash architecture
-    res.locals.error = req.flash('error')
-    next();
-})
-
-app.use((req, res, next) => {
-    res.locals.isSignedIn = req.isAuthenticated();
+    res.locals.error = req.flash('error');
+    res.locals.currentUser = req.user; // req.user is set when a user is logged in)
     next();
 })
 
@@ -76,7 +72,6 @@ app.listen(PORT, () => {
 
 // home route
 app.get("/", (req, res) => {
-    res.send(req.signedCookies);
     res.render("home");
 });
 

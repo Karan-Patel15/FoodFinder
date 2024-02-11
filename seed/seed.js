@@ -17,7 +17,7 @@ const seedDB = async function() {
         let res = restaurantData[i];
         let newRestaurant = new Restaurant(
             {
-                name: `${res.name}`,image: res.image_url, description: `${res.categories[0].title}`,
+                author: "6584aacbeaebb597b9b0dc07", name: `${res.name}`,image: res.image_url, description: `${res.categories[0].title}`,
                 address: `${res.location.display_address[0]},` + ` ${res.location.city}`
                 + ` ${res.location.zip_code}`
         });
