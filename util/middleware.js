@@ -1,6 +1,6 @@
 const Restaurant = require("../models/restaurant.js");
 const Review = require("../models/review.js");
-const { restaurantSchema, reviewSchema } = require('../schemas.js');
+const { restaurantSchema, reviewSchema } = require('../backendValidation/schemas.js');
 const ExpressError = require("./ExpressError.js");
 
 const validateRestaurant = (req, res, next) => {
